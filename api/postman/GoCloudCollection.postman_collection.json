@@ -1,0 +1,284 @@
+{
+	"info": {
+		"_postman_id": "e2f7b497-6b25-4f0d-99c6-825f54f6ed4b",
+		"name": "GoCloudCollection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "There is no pending Task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9fd6369f-9392-4389-8369-85fd20824f58",
+						"exec": [
+							"\r",
+							"pm.test(\"Test task not in pending\", function () {\r",
+							"    var responseBody = `${pm.response.body}`;\r",
+							"    pm.expect(responseBody).not.to.contain(pm.globals.get('task_description'));\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "31d37d84-1669-491e-a3ac-04cf2990f2c1",
+						"exec": [
+							"var uuid = require('uuid'); \r",
+							"var date = new Intl.DateTimeFormat(\r",
+							"        'default',\r",
+							"        { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false, }\r",
+							"    ).format(Date.now());\r",
+							"\r",
+							"var taskDescription = `New task created ${uuid.v4()} at ${date}`;\r",
+							"\r",
+							"pm.globals.set('task_description', taskDescription);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{todo_api}}/tasks/pending",
+					"host": [
+						"{{todo_api}}"
+					],
+					"path": [
+						"tasks",
+						"pending"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "dd8767f9-01bf-42e4-8e69-cc407592ef64",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"description\": \"{{task_description}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{todo_api}}/tasks",
+					"host": [
+						"{{todo_api}}"
+					],
+					"path": [
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "The Created Task is Pending",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9fd6369f-9392-4389-8369-85fd20824f58",
+						"exec": [
+							"\r",
+							"pm.test(\"Test task is now pending\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    var filteredData = jsonData.filter((task) => {\r",
+							"        return task.description === pm.globals.get('task_description');\r",
+							"    });\r",
+							"\r",
+							"    pm.expect(filteredData.length).to.eql(1);\r",
+							"\r",
+							"    var taskId = filteredData[0].id;\r",
+							"    pm.expect(!!taskId).to.eql(true);\r",
+							"\r",
+							"    pm.environment.set(\"task_id\", taskId);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{todo_api}}/tasks/pending",
+					"host": [
+						"{{todo_api}}"
+					],
+					"path": [
+						"tasks",
+						"pending"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "The Created Task is not Completed",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "902d06f2-6155-45da-9254-c043abc0e090",
+						"exec": [
+							"pm.test(\"Test task is not completed yet\", function () {\r",
+							"    var responseBody = `${pm.response.body}`;\r",
+							"    pm.expect(responseBody).not.to.be.undefined;\r",
+							"    pm.expect(responseBody).not.to.contain(pm.globals.get('task_description'));\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{todo_api}}/tasks/completed",
+					"host": [
+						"{{todo_api}}"
+					],
+					"path": [
+						"tasks",
+						"completed"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Complete Task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "83b9821c-d508-4259-9435-9afccaa63b9e",
+						"exec": [
+							"pm.test(\"Test task is completed\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{todo_api}}/tasks/{{task_id}}/complete",
+					"host": [
+						"{{todo_api}}"
+					],
+					"path": [
+						"tasks",
+						"{{task_id}}",
+						"complete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "The Created Task is not Pending anymore",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1767bb03-ba60-492b-8dfe-aa76c9b19e12",
+						"exec": [
+							"\r",
+							"pm.test(\"Test task not pending anymore\", function () {\r",
+							"    var responseBody = `${pm.response.body}`;\r",
+							"    pm.expect(responseBody).not.to.be.undefined;\r",
+							"    pm.expect(responseBody).not.to.contain(pm.globals.get('task_description'));\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{todo_api}}/tasks/pending",
+					"host": [
+						"{{todo_api}}"
+					],
+					"path": [
+						"tasks",
+						"pending"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "The Created Task is now Completed",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a12f6167-a9ac-4c61-8a56-2d3a5b655d7e",
+						"exec": [
+							"pm.test(\"Test task is completed\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    var filteredData = jsonData.filter((task) => {\r",
+							"        return task.description === pm.globals.get('task_description');\r",
+							"    });\r",
+							"\r",
+							"    pm.expect(filteredData.length).to.eql(1);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{todo_api}}/tasks/completed",
+					"host": [
+						"{{todo_api}}"
+					],
+					"path": [
+						"tasks",
+						"completed"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
