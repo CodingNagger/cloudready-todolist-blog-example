@@ -1,0 +1,7 @@
+# Ignore potential root level executable
+server*
+!cmd/server
+
+# Ignore local stack artefacts
+deployment/local/*
+!deployment/local/docker-compose.yml
