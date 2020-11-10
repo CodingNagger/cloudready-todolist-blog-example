@@ -20,11 +20,11 @@ go test ./...
 TMPDIR=./deployment/local/tmp PORT_WEB_UI=8181 docker-compose -f ./deployment/localstack/docker-compose.yml up
 
 # Create table
-AWS_ACCESS_KEY_ID=example AWS_SECRET_KEY=example go run -v ./cmd/init/table -region us-east-1 -endpoint http://localhost:4566
+AWS_PROFILE=localdev go run -v ./cmd/init/table -endpoint http://localhost:4566
 
 # Build application
 go build -v ./cmd/server/
 
 # Start application
-AWS_ACCESS_KEY_ID=example AWS_SECRET_KEY=example ./server -region us-east-1 -endpoint http://localhost:4566
+AWS_PROFILE=localdev ./server -endpoint http://localhost:4566
 ```

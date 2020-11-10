@@ -29,6 +29,6 @@ func main() {
 	// set up the HTTP server
 	router := rest.Handler(creator, lister, completor)
 
-	fmt.Println("The tasks server is running: http://localhost:8080")
+	fmt.Println("The tasks server is running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

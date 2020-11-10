@@ -16,7 +16,6 @@ import (
 
 var (
 	tableName *string
-	awsConfig *aws.Config
 )
 
 // Storage keeps tasks data in memory
@@ -27,24 +26,20 @@ type Storage struct {
 func NewStorage(config TodoConfig) *Storage {
 	c := aws.NewConfig()
 
-	if len(config.Region) > 0 {
-		c = c.WithRegion(config.Region)
-	}
-
 	if len(config.Endpoint) > 0 {
 		c = c.WithEndpoint(config.Endpoint)
 	}
 
 	tableName = &config.TableName
-	awsConfig = c
 
 	return new(Storage)
 }
 
 // NewDynamoDBClient creates a new DynamoDB client
 func (s Storage) NewDynamoDBClient() *dynamodb.DynamoDB {
-	session := session.Must(session.NewSession(awsConfig))
-	return dynamodb.New(session)
+	sess := session.Must(session.NewSession())
+
+	return dynamodb.New(sess)
 }
 
 // CreateTask adds a new task in memory
